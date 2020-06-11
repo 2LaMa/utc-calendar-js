@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import './App.css';
 import { Inject, ScheduleComponent, Day, Week, WorkWeek, Month, Agenda, ViewsDirective, ViewDirective, EventSettingsModel } from '@syncfusion/ej2-react-schedule';
-import { DataManager, UrlAdaptor } from '@syncfusion/ej2-data';
-import {DropDownListComponent} from "@syncfusion/ej2-react-dropdowns";
+//import {DataManager, UrlAdaptor} from '@syncfusion/ej2-data';
+//import {DropDownListComponent} from "@syncfusion/ej2-react-dropdowns";
 import { DateTimePickerComponent} from "@syncfusion/ej2-react-calendars";
 import AddSchedule from './components/AddSchedule';
 
@@ -16,7 +16,8 @@ export class App extends React.Component {
     this.state = {
       error: null,
       isLoaded: false,
-      uvs: []
+      uvs: [],
+      colourMap: {}
     };
     this.getSchedule = this.getSchedule.bind(this)
 
@@ -30,23 +31,27 @@ export class App extends React.Component {
     this.render();
   }
 
+  static onEventRendered(args) {
+    App.applyCategoryColor(args);
+  }
+
   assignateColours(cal){
-    let colourMap = [];
-    for (let [key, course] of Object.entries(cal)){
+    let colourMap = this.state.colourMap;
+    for (let [, course] of Object.entries(cal)){
       let uvName = course.Subject;
       if (uvName in colourMap){
         course.CategoryColor = colourMap[uvName];
       }
       else{
-        colourMap.uvName = randomColor({luminosity: 'light'});
-        course.CategoryColor = colourMap.uvName;
+        colourMap[uvName] = randomColor({luminosity: 'bright'});
+        course.CategoryColor = colourMap[uvName];
       }
     }
+    console.log('colormap', colourMap);
     return cal;
   }
 
-  applyCategoryColor(args){
-    console.log("HERE", args);
+  static applyCategoryColor(args){
     let categoryColor = args.data.CategoryColor;
     if (!args.element || !categoryColor) {
       return;
@@ -54,16 +59,16 @@ export class App extends React.Component {
     args.element.style.backgroundColor = categoryColor;
   }
 
-  processJsonCal(cal) {
+  static processJsonCal(cal) {
     let fittedCal = [];
-    for (let [key, course] of Object.entries(cal)) {
-      let properDate = this.parseDate(course);
+    for (let [, course] of Object.entries(cal)) {
+      let properDate = App.parseDate(course);
       fittedCal.push(properDate);
     }
     return fittedCal;
   }
 
-  freqCourse(type){
+  static freqCourse(type){
     if (type === 'TP'){
       return 'FREQ=WEEKLY;INTERVAL=2'
     }
@@ -71,7 +76,7 @@ export class App extends React.Component {
       return 'FREQ=WEEKLY;INTERVAL=1'
     }
   }
-  parseDate(course) {
+  static parseDate(course) {
     const dayMapper = {
       'LUNDI': 1,
       'MARDI': 2,
@@ -94,7 +99,8 @@ export class App extends React.Component {
       EndTime: end,
       Description: course.type + ' - ' + course.group,
       Location: course.room,
-      RecurrenceRule: this.freqCourse(course.type)
+      RecurrenceRule: App.freqCourse(course.type),
+      ResourceId: 1 //TODO
     }
   }
 
@@ -104,11 +110,9 @@ export class App extends React.Component {
         .then(
 
             (result) => {
-              console.log(Object.values(this.processJsonCal(result)));
-              console.log(this.state);
-              let cal = this.processJsonCal(result);
+              console.log(Object.values(App.processJsonCal(result)));
+              let cal = App.processJsonCal(result);
               cal = this.assignateColours(cal);
-              this.applyCategoryColor(cal);
               this.setState({
                 uvs: Object.values(cal),
                 isLoaded: true
@@ -176,7 +180,7 @@ export class App extends React.Component {
             </div>
             <ScheduleComponent width='100%'  currentView='Week' eventSettings = {{dataSource: this.state.uvs}}
                                editorTemplate={App.editorWindowTemplate.bind(this.state.uvs)}
-                               eventRendered={(args) => this.applyCategoryColor(args, this.currentView)} >
+                               eventRendered={App.onEventRendered.bind(this)} >
 
               <ViewsDirective>
                 <ViewDirective option='WorkWeek' startHour='7:00' endHour='20:00'/>
