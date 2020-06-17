@@ -5,6 +5,7 @@ import { Inject, ScheduleComponent, Day, Week, WorkWeek, Month, Agenda, ViewsDir
 //import {DropDownListComponent} from "@syncfusion/ej2-react-dropdowns";
 import { DateTimePickerComponent} from "@syncfusion/ej2-react-calendars";
 import AddSchedule from './components/AddSchedule';
+import DeleteSchedule from './components/DeleteSchedule';
 
 var randomColor = require('randomcolor');
 
@@ -17,6 +18,7 @@ export class App extends React.Component {
       error: null,
       isLoaded: false,
       uvs: [],
+      users:[],
       colourMap: {}
     };
     this.getSchedule = this.getSchedule.bind(this)
@@ -49,6 +51,10 @@ export class App extends React.Component {
     }
     console.log('colormap', colourMap);
     return cal;
+  }
+
+  newUser(idEtu){
+      this.state.users.push(idEtu)
   }
 
   static applyCategoryColor(args){
@@ -177,6 +183,7 @@ export class App extends React.Component {
             <div>
             <AddSchedule name={'add'} getSchedule={this.getSchedule}/>
               Supprimer :
+                <DeleteSchedule name={'del'} />
             </div>
             <ScheduleComponent width='100%'  currentView='Week' eventSettings = {{dataSource: this.state.uvs}}
                                editorTemplate={App.editorWindowTemplate.bind(this.state.uvs)}
