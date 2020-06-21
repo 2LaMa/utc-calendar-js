@@ -15,7 +15,6 @@ export class App extends React.Component {
     super(props);
     this.state = {
       error: null,
-      errFetch:'',
       isLoaded: false,
       uvs: [],
 	  otherUvs: [],
@@ -102,7 +101,6 @@ export class App extends React.Component {
       Description: course.type + ' - ' + course.group,
       Location: course.room,
       RecurrenceRule: App.freqCourse(course.type),
-      ResourceId: 1 //TODO
     }
   }
 

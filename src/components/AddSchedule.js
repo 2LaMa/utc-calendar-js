@@ -42,7 +42,7 @@ export default class addSchedule extends React.Component {
     render() {
         return (
             <div>
-                <h1 style={{ marginLeft: 10, marginBottom: 0, marginTop: 10 }}>Hello {this.state.idEtu}</h1>
+                <h1 style={{ marginLeft: 10, marginBottom: 0, marginTop: 10 }}>Your schedule {this.state.idEtu}</h1>
                 <div id={'errMessage'} style={{ visibility: 'hidden', color:'red', marginLeft: 10 }}>Could not find this id. Please retry.</div>
                 <div class="flex-container">
                     <span>
