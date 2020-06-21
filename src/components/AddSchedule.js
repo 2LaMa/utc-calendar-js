@@ -6,6 +6,7 @@ export default class addSchedule extends React.Component {
         super(props);
         this.state = {
             idEtu: '',
+            error:false,
             uvs: []
         };
         this.handleChange = this.handleChange.bind(this);
@@ -16,7 +17,7 @@ export default class addSchedule extends React.Component {
     handleSubmit = (event) => {
         event.preventDefault();
         console.log(this.state);
-        this.props.getSchedule(this.state.idEtu);
+        this.props.getSchedule(this.state.idEtu,false);
      }
 
     handleChange = (event) => {
@@ -24,18 +25,53 @@ export default class addSchedule extends React.Component {
         console.log(this.state.idEtu);
     }
 
+	handleNew = (event) => {
+		event.preventDefault();
+        this.setState({idOtherEtu: event.target.value});
+		console.log(this.state.idOtherEtu);
+		this.props.getSchedule(this.state.idOtherEtu,true)
+	}
+	
+	handleOtherChange = (event) => {
+        this.setState({idOtherEtu: event.target.value});
+        console.log(this.state.idOtherEtu);
+    }
+
+
+	
     render() {
         return (
-            <form onSubmit={this.handleSubmit} >
-                <h1>Hello {this.state.idEtu}</h1>
-                <p>Enter your name, and submit:</p>
-                <input
-                    type='text' value={this.state.idEtu} onChange={this.handleChange}
-                />
-                <input
-                    type='submit' value={'Submit'}
-                />
-            </form>
+            <div>
+                <h1 style={{ marginLeft: 10, marginBottom: 0, marginTop: 10 }}>Hello {this.state.idEtu}</h1>
+                <div id={'errMessage'} style={{ visibility: 'hidden', color:'red', marginLeft: 10 }}>Could not find this id. Please retry.</div>
+                <div class="flex-container">
+                    <span>
+                        <form onSubmit={this.handleSubmit} >
+                            Find your schedule:
+                            <input
+                                type='text' value={this.state.idEtu} onChange={this.handleChange}
+                            />
+                            <input
+                                type='submit' value={'Search'}
+                            />
+                        </form>
+                    </span>
+                    <span>
+                        <form onSubmit={this.handleNew}>
+                            <div>
+                              Add another schedule to compare:
+                                <input
+                                    type='text' value={this.state.idOtherEtu} onChange={this.handleOtherChange}
+                                />
+                                <input
+                                    type='submit' value={'Search'}
+                                />
+
+                            </div>
+                        </form>
+                    </span>
+                </div>
+            </div>
         );
     }
 }

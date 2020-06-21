@@ -5,7 +5,6 @@ import { Inject, ScheduleComponent, Day, Week, WorkWeek, Month, Agenda, ViewsDir
 //import {DropDownListComponent} from "@syncfusion/ej2-react-dropdowns";
 import { DateTimePickerComponent} from "@syncfusion/ej2-react-calendars";
 import AddSchedule from './components/AddSchedule';
-import DeleteSchedule from './components/DeleteSchedule';
 
 var randomColor = require('randomcolor');
 
@@ -16,9 +15,10 @@ export class App extends React.Component {
     super(props);
     this.state = {
       error: null,
+      errFetch:'',
       isLoaded: false,
       uvs: [],
-      users:[],
+	  otherUvs: [],
       colourMap: {}
     };
     this.getSchedule = this.getSchedule.bind(this)
@@ -51,10 +51,6 @@ export class App extends React.Component {
     }
     console.log('colormap', colourMap);
     return cal;
-  }
-
-  newUser(idEtu){
-      this.state.users.push(idEtu)
   }
 
   static applyCategoryColor(args){
@@ -110,20 +106,34 @@ export class App extends React.Component {
     }
   }
 
-  getSchedule(id) {
+  getSchedule(id,isOther) {
     fetch('https://cors-anywhere.herokuapp.com/https://webapplis.utc.fr/Edt_ent_rest/myedt/result/?login=' + id )
         .then(res => res.json())
         .then(
 
             (result) => {
+              console.log(result)
+              if (result.length == 0) {
+                document.getElementById('errMessage').style.visibility = 'visible';
+              }
+              else if (result.length > 0){
+                document.getElementById('errMessage').style.visibility = 'hidden';
+              }
               console.log(Object.values(App.processJsonCal(result)));
               let cal = App.processJsonCal(result);
               cal = this.assignateColours(cal);
-              this.setState({
-                uvs: Object.values(cal),
-                isLoaded: true
-              });
-              console.log(this.state.uvs);
+			  if (!isOther){
+				  this.setState({
+					uvs: Object.values(cal),
+					isLoaded: true
+				  });
+				  console.log(this.state.uvs);
+			  } else {
+				  this.setState({
+					otherUvs: Object.values(cal),
+					isLoaded: true
+				  });
+			  }
               this.render();
             },
             (error) => {
@@ -136,8 +146,6 @@ export class App extends React.Component {
         )
 
   }
-
-
 
 
   static editorWindowTemplate(props){
@@ -178,14 +186,14 @@ export class App extends React.Component {
     } else if (!this.state.isLoaded) {
       return <div>Chargement…</div>;
     } else {
+		this.state.allUvs= this.state.uvs.concat(this.state.otherUvs);
+		console.log(this.state.allUvs);
       return (
           <div>
             <div>
             <AddSchedule name={'add'} getSchedule={this.getSchedule}/>
-              Supprimer :
-                <DeleteSchedule name={'del'} />
-            </div>
-            <ScheduleComponent width='100%'  currentView='Week' eventSettings = {{dataSource: this.state.uvs}}
+			</div>
+            <ScheduleComponent width='100%'  currentView='WorkWeek' eventSettings = {{dataSource: this.state.allUvs}}
                                editorTemplate={App.editorWindowTemplate.bind(this.state.uvs)}
                                eventRendered={App.onEventRendered.bind(this)} >
 
